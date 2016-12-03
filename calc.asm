@@ -39,40 +39,40 @@ loop1:
     je oper
     cmp [si], 0
     jne next1
-oper:
+oper: ; process '+' '-' ')' and EOL, add current number to result 
     cmp cx, '+'
     jne minus
-    add bx, ax
+    add bx, ax ; process last oper '+'
     jmp finish_eval
 minus:
-    sub bx, ax
-finish_eval:
+    sub bx, ax ; process last oper '-'
+finish_eval:   
     cmp [si], ')'
     jne not_rb
     ;right bracket
-    mov ax, bx
+    mov ax, bx ; save result to ax and return
     ret
 not_rb:
     cmp [si], 0
     je finish    
-    mov ax, 0
-    mov cl, [si]
+    mov ax, 0 ; clear current number
+    mov cl, [si] ; save this oper to cx
     mov ch, 0
     jmp finish_char
           
 next1:
-    cmp [si], '('
+    cmp [si], '(' ; process '('
     jne next2
-    push bx
+    push bx ; push local variable onto stack
     push cx
     inc si
-    call calc
-    pop cx
+    call calc ; call calc to process expression between brackets
+    pop cx ; pop local variable from stack
     pop bx
     jmp finish_char
      
 next2: ; number
-    mov dx, 10
+    mov dx, 10 ; ax = ax * 10 + new_digit
     mul dx
     mov dl, [si]
     mov dh, 0
@@ -84,7 +84,7 @@ finish_char:
     jmp loop1
     
 finish:
-    ; new line
+    ; print new line
     mov ah, 2
     mov dl, 13
     int 21h
@@ -95,7 +95,7 @@ finish:
     mov ax, bx
     call print_num    
     
-    ; new line
+    ; print new line
     mov ah, 2
     mov dl, 13
     int 21h
